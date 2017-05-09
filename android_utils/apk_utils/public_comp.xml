@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <public type="attr" name="civ_border_width" id="0x7f010000" />
+    <public type="attr" name="civ_border_color" id="0x7f010001" />
+    <public type="attr" name="press_cover_color" id="0x7f010002" />
+    <public type="attr" name="SwipeBackLayoutStyle" id="0x7f010003" />
+    <public type="attr" name="centered" id="0x7f010004" />
+    <public type="attr" name="drawerArrowStyle" id="0x7f010005" />
+    <public type="attr" name="height" id="0x7f010006" />
+    <public type="attr" name="isLightTheme" id="0x7f010007" />
+    <public type="attr" name="selectedColor" id="0x7f010008" />
+    <public type="attr" name="strokeWidth" id="0x7f010009" />
+    <public type="attr" name="title" id="0x7f01000a" />
+    <public type="attr" name="unselectedColor" id="0x7f01000b" />
+    <public type="attr" name="navigationMode" id="0x7f01000c" />
+    <public type="attr" name="displayOptions" id="0x7f01000d" />
+    <public type="attr" name="subtitle" id="0x7f01000e" />
+    <public type="attr" name="titleTextStyle" id="0x7f01000f" />
+    <public type="attr" name="subtitleTextStyle" id="0x7f010010" />
+    <public type="attr" name="icon" id="0x7f010011" />
+    <public type="attr" name="logo" id="0x7f010012" />
+    <public type="attr" name="divider" id="0x7f010013" />
+    <public type="attr" name="background" id="0x7f010014" />
+
+</resources>
