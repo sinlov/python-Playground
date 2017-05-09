@@ -3,6 +3,14 @@
 
 ## remove_android_butter_knife
 
+get resource
+
+```sh
+curl -O https://raw.githubusercontent.com/sinlov/python-Playground/master/android_utils/remove_android_butter_knife.py
+```
+
+> or download https://raw.githubusercontent.com/sinlov/python-Playground/master/android_utils/remove_android_butter_knife.py
+
 ```sh
 # see use help
 python remove_android_butter_knife.py -h
