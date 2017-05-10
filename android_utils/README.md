@@ -3,6 +3,8 @@
 
 ## remove_android_butter_knife
 
+`This utils not fix code! so, you have to fix!`
+
 get resource
 
 ```sh
