@@ -18,6 +18,10 @@ BIND_PATTERN = re.compile('(@BindView\((.*?)\)\s*(.*?)\s+(.*?);)')
 CLICK_PATTERN = re.compile('(@OnClick\(\s*\{?(.*?)\}\s*\))')
 CLASS_IMPLEMENTS_VIEW_ON_CLICK_LISTENER_PATTERN = re.compile('(.*?class.*?implements.*?View.OnClickListener.*?)')
 
+REMOVE_BUTTER_KNIFE_IMPORT_BASE_PATTERN = re.compile('(import butterknife.ButterKnife;)')
+REMOVE_BUTTER_KNIFE_IMPORT_BIND_VIEW_PATTERN = re.compile('(import butterknife.BindView;)')
+REMOVE_BUTTER_KNIFE_IMPORT_ON_CLICK_PATTERN = re.compile('(import butterknife.OnClick;)')
+
 FIND_VIEW_FORMAT_WITH_VIEW = '        %s = (%s) %sfindViewById(%s);\n'
 # FIND_VIEW_FORMAT = '        %s = (%s) findViewById(%s);\n'
 SET_CLICK_FORMAT = '        %s.setOnClickListener(this);\n'
@@ -57,7 +61,7 @@ def check_work_path(path=str):
     init_log(path)
 
 
-def insert_find_view_method(source, add):
+def insert_find_view_method(source=str, add=str):
     pos = source.rfind('}')
     changed = source[:pos] + add
     if pos + 1 < len(source):  # not last
@@ -86,7 +90,10 @@ def replace_butter_knife(java_path):
             verbose_print('butter knife java res path: %s' % java_path)
             butter = find_butter_class[0]
 
-            # print butter
+            # remove import of bind view
+            content = remove_import_of_butter_knife(content, REMOVE_BUTTER_KNIFE_IMPORT_BASE_PATTERN)
+            content = remove_import_of_butter_knife(content, REMOVE_BUTTER_KNIFE_IMPORT_BIND_VIEW_PATTERN)
+
             content = content.replace(butter[0], "%s();" % NEW_METHOD_NAME_OF_FIND_VIEW)
             if butter[0].find(',') != -1 and butter[1]:
                 m_view = butter[1].split(',')[1].replace(" ", "") + '.'
@@ -107,6 +114,7 @@ def replace_butter_knife(java_path):
 
             onclick = CLICK_PATTERN.findall(content)
             if onclick:
+                content = remove_import_of_butter_knife(content, REMOVE_BUTTER_KNIFE_IMPORT_ON_CLICK_PATTERN)
                 warning_on_click_inject = '\t-> Fix Warning OnClick Inject need fix \nPath: %s\n' % java_path
                 print warning_on_click_inject
                 logger.warn(warning_on_click_inject)
@@ -132,6 +140,14 @@ def replace_butter_knife(java_path):
             print_done_info = '=> Done Java file path: %s' % java_path
             print print_done_info
             logger.info(print_done_info)
+
+
+def remove_import_of_butter_knife(content, pattern):
+    import_base = pattern.findall(content)
+    if import_base:
+        for import_b in import_base:
+            content = content.replace(import_b, '')
+    return content
 
 
 def find_out_java_res(root_path=str):
@@ -171,6 +187,10 @@ if __name__ == '__main__':
     if options.rootPath is not None:
         if options.rootPath is not 'pwd' and options.rootPath is not '':
             input_root_path = options.rootPath
+            exists = os.path.exists(input_root_path)
+            if not exists:
+                print 'You input path is not exists!'
+                exit(1)
     if options.methodNewBindView is not None:
         print 'new bind view method name is: %s' % options.methodNewBindView
         NEW_METHOD_NAME_OF_FIND_VIEW = options.methodNewBindView
