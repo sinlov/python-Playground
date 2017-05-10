@@ -16,7 +16,7 @@ curl -O https://raw.githubusercontent.com/sinlov/python-Playground/master/androi
 ```sh
 # see use help
 python remove_android_butter_knife.py -h
-```
+```π
 
 you can use like
 
