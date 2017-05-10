@@ -14,7 +14,8 @@ sys.setdefaultencoding('utf-8')
 
 # CLASS_NAME_PATTERN = re.compile('')
 BUTTER_KNIFE_PATTERN = re.compile('(ButterKnife.bind\(.*?,*\s*(.*)\);)')
-BIND_PATTERN = re.compile('(@BindView\((.*?)\)\s*(.*?)\s+(.*?);)')
+BIND_PATTERN_OLD = re.compile('(@Bind\((.*?)\)\s*(.*?)\s+(.*?);)')
+BIND_PATTERN_NEW = re.compile('(@BindView\((.*?)\)\s*(.*?)\s+(.*?);)')
 CLICK_PATTERN = re.compile('(@OnClick\(\s*\{?(.*?)\}\s*\))')
 CLASS_IMPLEMENTS_VIEW_ON_CLICK_LISTENER_PATTERN = re.compile('(.*?class.*?implements.*?View.OnClickListener.*?)')
 
@@ -31,6 +32,8 @@ SET_CLICK_FORMAT_BY_FIND_VIEW = '        %sfindViewById(%s).setOnClickListener(t
 NEW_METHOD_NAME_OF_FIND_VIEW = 'initViewByFindViewByID'
 
 is_verbose = False
+is_new_bind_version = False
+is_try_to_replace_on_click = False
 
 
 def verbose_print(info=str):
@@ -98,7 +101,10 @@ def replace_butter_knife(java_path):
             if butter[0].find(',') != -1 and butter[1]:
                 m_view = butter[1].split(',')[1].replace(" ", "") + '.'
 
-            binds = BIND_PATTERN.findall(content)
+            if is_new_bind_version:
+                binds = BIND_PATTERN_NEW.findall(content)
+            else:
+                binds = BIND_PATTERN_OLD.findall(content)
             init_method = '\n    private void %s() {\n' % NEW_METHOD_NAME_OF_FIND_VIEW
             for bind in binds:
                 view_id = bind[1]
@@ -112,17 +118,20 @@ def replace_butter_knife(java_path):
                 # else:
                 #     init_method += str.format(FIND_VIEW_FORMAT % (view_filed, view_type, view_id))
 
-            onclick = CLICK_PATTERN.findall(content)
-            if onclick:
-                content = remove_import_of_butter_knife(content, REMOVE_BUTTER_KNIFE_IMPORT_ON_CLICK_PATTERN)
-                warning_on_click_inject = '\t-> Fix Warning OnClick Inject need fix \nPath: %s\n' % java_path
-                print warning_on_click_inject
-                logger.warn(warning_on_click_inject)
-                content = content.replace(onclick[0][0], '@Override')
-                click_ids = onclick[0][1].replace(' ', '').split(',')
-                for click_id in click_ids:
-                    # print click_id
-                    init_method += get_click_str(binds, click_id, m_view)
+            if is_try_to_replace_on_click:
+                # if want change replace OnClick review this
+                onclick = CLICK_PATTERN.findall(content)
+                if onclick:
+                    content = remove_import_of_butter_knife(content, REMOVE_BUTTER_KNIFE_IMPORT_ON_CLICK_PATTERN)
+                    warning_on_click_inject = '\t-> Fix Warning OnClick Inject need fix \nPath: %s\n' % java_path
+                    print warning_on_click_inject
+                    logger.warn(warning_on_click_inject)
+                    content = content.replace(onclick[0][0], '@Override')
+                    click_ids = onclick[0][1].replace(' ', '').split(',')
+                    for click_id in click_ids:
+                        # print click_id
+                        init_method += get_click_str(binds, click_id, m_view)
+
             init_method += "    }\n}"
 
             content = insert_find_view_method(content, init_method)
@@ -179,9 +188,18 @@ if __name__ == '__main__':
     parser.add_option('-m', '--methodNewBindView', dest='methodNewBindView', type="string",
                       help="new bind view method name Default is initViewByFindViewByID",
                       metavar="initViewByFindViewByID")
+    parser.add_option('-n', '--newButterKnifeVersion', dest='newButterKnifeVersion', action="store_true",
+                      help="choose version of default is @Bind if use is @BindView",
+                      default=False)
+    parser.add_option('-c', '--onClickReplace', dest='onClickReplace', action="store_true", help="see verbose",
+                      default=False)
     (options, args) = parser.parse_args()
     if options.v_verbose:
         is_verbose = True
+    if options.newButterKnifeVersion:
+        is_new_bind_version = True
+    if options.onClickReplace:
+        is_try_to_replace_on_click = True
     input_root_path = os.getcwd()
     print input_root_path
     if options.rootPath is not None:
